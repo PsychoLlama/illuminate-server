@@ -3,40 +3,43 @@
 *Home IoT dashboard server*
 
 ## Why
-<!-- Explain why you built the project -->
+I'm excited by IoT, dashboards, and IoT dashboards.
 
-## How
-<!-- Explain how it solves the problem -->
+And I wanted one for my home.
+
+Here are some of the server features:
+- Hue bridge state polling.
+- States are diffed, changes pushed to the clients.
+- Usage metrics are logged in a database.
+
+Clients developed independently.
 
 ## API
-
-### Installing
-
-#### Using npm
-> If you're not familiar with node or npm, you can install them [here](https://docs.npmjs.com/getting-started/what-is-npm).
-
-Using npm, run this:
-```sh
-$ npm install illuminate-server
-```
-
-Now from your project, you can import it:
-
-```js
-// ES Modules
-import lib from 'illuminate-server'
-
-// CommonJS
-const lib = require('illuminate-server')
-```
-
-#### Using git
-If you enjoy living on the edge, you can install the latest version of `illuminate-server` on GitHub.
+First, download the server.
 
 ```sh
-$ git clone https://GitHub/PsychoLlama      illuminate-server cloned
-$ cd cloned
-
-# Start the compiler.
-$ npm run dev
+$ git clone https://GitHub/PsychoLlama/illuminate-server
+$ cd illuminate-server
 ```
+
+Sweet. Now install the dependencies.
+
+```sh
+$ npm install
+```
+
+You'll need to configure the server, telling it where to find your Hue bridge.
+
+Just follow the prompts.
+
+```sh
+$ npm run setup
+```
+
+Lastly, start the server.
+
+```sh
+$ npm start
+```
+
+You're golden! Now you can download any client drivers and point them to this server.
