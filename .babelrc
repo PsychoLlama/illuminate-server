@@ -9,7 +9,5 @@
       "module": "bluebird",
       "method": "coroutine"
     }]
-  ],
-
-  "ignore": ["*test.js"]
+  ]
 }
