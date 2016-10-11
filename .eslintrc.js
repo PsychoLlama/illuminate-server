@@ -4,7 +4,7 @@ const eslint = exports;
 
 // What environments the code runs in.
 eslint.env = {
-  'shared-node-browser': true,
+  node: true,
   es6: true,
   commonjs: true,
 };
