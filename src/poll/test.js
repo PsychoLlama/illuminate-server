@@ -5,10 +5,13 @@ import Promise from 'bluebird';
 import poll from './index';
 
 describe('A poll', () => {
-  let timeout, clear, get;
+  let timeout, clear, get, callback;
   const response = Promise.resolve({
     data: 'success',
   });
+
+  const endpoint = 'url.com';
+  const interval = 500;
 
   const failure = new Error('Testing how `poll` handles axios rejections.');
 
@@ -16,38 +19,40 @@ describe('A poll', () => {
     timeout = spyOn(global, 'setTimeout');
     clear = spyOn(global, 'clearTimeout');
     get = spyOn(axios, 'get').andReturn(response);
+    callback = createSpy();
   });
 
   afterEach(restoreSpies);
 
   it('should start immediately', async () => {
-    const cb = createSpy();
 
-    poll('url.com', 500, cb);
+    poll({ endpoint, interval, callback });
+
     expect(get).toHaveBeenCalled();
 
     // Wait for one promise tick.
     await Promise.resolve();
 
-    expect(cb).toHaveBeenCalledWith(null, 'success');
+    expect(callback).toHaveBeenCalledWith(null, 'success');
   });
 
   it('should report errors', async () => {
-    const cb = createSpy();
 
     const rejection = Promise.reject(failure);
     get.andReturn(rejection);
-    poll('url.com', 500, cb);
+
+    poll({ endpoint, interval, callback });
 
     // Wait for one promise tick.
     await Promise.resolve();
 
-    expect(cb).toHaveBeenCalledWith(failure, null);
+    expect(callback).toHaveBeenCalledWith(failure, null);
   });
 
-  it.only('should set a timeout for the next poll', async () => {
+  it('should set a timeout for the next poll', async () => {
     const interval = 500;
-    poll('url.com', interval, () => {});
+
+    poll({ endpoint, interval, callback });
 
     // Check after two promise ticks.
     await Promise.resolve();
@@ -70,16 +75,15 @@ describe('A poll', () => {
   });
 
   it('should end polling when stop is called', async () => {
-    const spy = createSpy();
-    const stop = poll('url.com', 500, spy);
+    const stop = poll({ endpoint, interval, callback });
+
     stop();
 
     // Wait for one promise tick.
     await Promise.resolve();
 
-    expect(spy).toNotHaveBeenCalled();
+    expect(callback).toNotHaveBeenCalled();
     expect(clear).toHaveBeenCalled();
-
   });
 
 });

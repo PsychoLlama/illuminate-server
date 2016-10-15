@@ -2,13 +2,14 @@ import axios from 'axios';
 
 /**
  * Polls an endpoint at an interval.
- * @param  {String} endpoint - The URL to poll.
- * @param  {Number} interval - An interval to poll at in milliseconds.
- * @param  {Function} fn - A node-style callback, takes errors
+ * @param  {Object} poll - A description of what and how to poll.
+ * @param  {String} poll.endpoint - The URL to poll.
+ * @param  {Number} poll.interval - An interval to poll at in milliseconds.
+ * @param  {Function} poll.callback - A node-style callback, takes errors
  * and response data.
  * @return {Function} - Stops polling the endpoint.
  */
-const poll = (endpoint, interval, fn) => {
+const poll = ({ endpoint, interval, callback }) => {
 
   let timeout, ended = false;
 
@@ -29,11 +30,11 @@ const poll = (endpoint, interval, fn) => {
       }
 
       /** Pass the data, node callback style. */
-      fn(null, data);
+      callback(null, data);
     } catch (error) {
 
       /** Report errors. */
-      fn(error, null);
+      callback(error, null);
     }
   };
 
