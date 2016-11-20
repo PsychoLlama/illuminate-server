@@ -5,7 +5,7 @@ import Promise from 'bluebird';
 import poll from './index';
 
 describe('A poll', () => {
-  let timeout, clear, get, callback;
+  let timeout, clear, get, post, callback;
   const response = Promise.resolve({
     data: 'success',
   });
@@ -19,6 +19,7 @@ describe('A poll', () => {
     timeout = spyOn(global, 'setTimeout');
     clear = spyOn(global, 'clearTimeout');
     get = spyOn(axios, 'get').andReturn(response);
+    post = spyOn(axios, 'post').andReturn(response);
     callback = createSpy();
   });
 
@@ -84,6 +85,30 @@ describe('A poll', () => {
 
     expect(callback).toNotHaveBeenCalled();
     expect(clear).toHaveBeenCalled();
+  });
+
+  it('should allow different http methods', () => {
+    const stop = poll({
+      endpoint, interval, callback,
+      method: 'post',
+    });
+
+    stop();
+
+    expect(post).toHaveBeenCalled();
+  });
+
+  it('should send `data` with http POSTs', async () => {
+    const data = { 'data-stuff': true };
+    const stop = poll({
+      endpoint, interval, callback,
+      method: 'post',
+      data,
+    });
+
+    stop();
+
+    expect(post).toHaveBeenCalledWith(endpoint, data);
   });
 
 });

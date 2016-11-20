@@ -3,13 +3,20 @@ import axios from 'axios';
 /**
  * Polls an endpoint at an interval.
  * @param  {Object} poll - A description of what and how to poll.
+ * @param  {Function} [poll.method=get] - The HTTP method to use.
  * @param  {String} poll.endpoint - The URL to poll.
  * @param  {Number} poll.interval - An interval to poll at in milliseconds.
  * @param  {Function} poll.callback - A node-style callback, takes errors
  * and response data.
  * @return {Function} - Stops polling the endpoint.
  */
-const poll = ({ endpoint, interval, callback }) => {
+const poll = ({
+  method = 'get',
+  data: post,
+  endpoint,
+  interval,
+  callback,
+}) => {
 
   let timeout, ended = false;
 
@@ -22,7 +29,7 @@ const poll = ({ endpoint, interval, callback }) => {
     try {
 
       /** Send the request. */
-      const { data } = await axios.get(endpoint);
+      const { data } = await axios[method](endpoint, post);
 
       /** Quit if the request was cancelled. */
       if (ended) {

@@ -2,8 +2,8 @@ export Search from 'hue-bridge-discovery';
 import Search, {
   EVENT_HUE_DISCOVERED as found,
 } from 'hue-bridge-discovery';
-import axios from 'axios';
 import { hostname } from 'os';
+import poll from '../poll';
 
 /**
  * Initiate a search for a hue bridge.
@@ -39,66 +39,40 @@ export const search = (fn) => {
 /**
  * Poll a bridge for access until the button has been
  * pressed, or stop is called.
- * @param  {String}   url - The API endpoint to poll.
- * @param  {Function} fn  - Called when the bridge accepts.
+ * @param  {String} endpoint - The API endpoint to poll.
+ * @param  {Function} fn - Called when the bridge accepts.
  * @return {Function} - Stops polling.
  */
-export const connect = (url, fn) => {
-  if (!url) {
+export const connect = (endpoint, fn) => {
+  if (!endpoint) {
     throw new Error(
-      `'connect' expects a URL, was given "${url}".`
+      `'connect' expects a URL, was given "${endpoint}".`
     );
   }
 
   /** Get the device name. */
   const device = hostname();
-  let ended = false;
 
-  /**
-   * Post to the API.
-   * @return {Promise} - An axios.post promise.
-   */
-  const post = () => (
-    axios.post(url, {
-      devicetype: `illumination#${device}`,
-    })
-  );
+  const stop = poll({
+    endpoint,
+    method: 'post',
+    data: { devicetype: `illumination#${device}` },
 
-  /**
-   * Send post requests until successful,
-   * or stop is called.
-   * @return {Promise} - An axios.post promise.
-   */
-  const poll = () => (
-    post().then(({ data }) => {
-      const [result] = data;
+    callback (err, response) {
 
-      /** Don't proceed if stop was called. */
-      if (ended) {
-        return undefined;
+      if (err || !response) {
+        return;
       }
 
-      /** See if hue responded with success. */
+      const result = response[0] || {};
+
       if (result.success) {
         fn(result.success);
-        return undefined;
+        stop();
       }
 
-      /** Continue polling. */
-      return poll();
-
-      /** Continue polling on failures. */
-    }).catch(poll)
-  );
-
-  // Kick off the polling loop.
-  poll();
-
-  /**
-   * Ends the loop if called.
-   * @return {Boolean} - Just returns true.
-   */
-  const stop = () => (ended = true);
+    },
+  });
 
   return stop;
 };

@@ -24,6 +24,7 @@ describe('Hue bridge', () => {
         success: {},
       }],
     });
+
     post = spyOn(axios, 'post').andReturn(resolved);
   });
 
@@ -93,40 +94,47 @@ describe('Hue bridge', () => {
     });
 
     it('should post to the bridge', () => {
-      connect(url, noop);
+      const stop = connect(url, noop);
+
+      stop();
+
       expect(post).toHaveBeenCalled();
     });
 
     it('should post the devicetype', () => {
-      connect(url, noop);
+      const stop = connect(url, noop);
+
+      stop();
+
       expect(post).toHaveBeenCalledWith(url, {
         devicetype: `illumination#${hostname()}`,
       });
     });
 
-    it('should end polling when successful', () => {
+    it('should end polling when successful', async () => {
       const spy = createSpy();
       connect(url, spy);
 
-      return Promise.resolve().then(() => {
-        const result = success.data[0].success;
-        expect(spy).toHaveBeenCalledWith(result);
-      });
+      await Promise.resolve();
+
+      const result = success.data[0].success;
+      expect(spy).toHaveBeenCalledWith(result);
     });
 
     it('should return a function', () => {
-      const result = connect(url, noop);
-      expect(result).toBeA(Function);
+      const stop = connect(url, noop);
+      expect(stop).toBeA(Function);
+      stop();
     });
 
-    it('should stop polling when stop is called', () => {
+    it('should stop polling when stop is called', async () => {
       const spy = createSpy();
       const stop = connect(url, noop);
       stop();
       const original = spy.calls.length;
-      return Promise.resolve().then(() => {
-        expect(spy.calls.length).toBe(original);
-      });
+      await Promise.resolve();
+
+      expect(spy.calls.length).toBe(original);
     });
 
   });
