@@ -63,4 +63,7 @@ try {
   process.exit(1);
 }
 
+const { address, username } = config;
+export const baseURL = `http://${address}/api/${username}`;
+
 export default config;
