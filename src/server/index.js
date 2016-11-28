@@ -125,4 +125,11 @@ export default (config) => {
   /** Subscribe to bridge changes. */
   listeners.lights.push(server);
   listeners.groups.push(server);
+
+  /** Send the bridge state on connection. */
+  server.on('connection', (socket) => {
+    socket.emit('state', state);
+  });
+
+  return server;
 };

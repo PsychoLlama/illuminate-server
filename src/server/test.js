@@ -29,6 +29,10 @@ const {
 describe('The server', () => {
 
   beforeEach(() => mock.io.reset());
+  beforeEach(() => {
+    state.lights = {};
+    state.groups = {};
+  });
 
   describe('state', () => {
 
@@ -175,6 +179,23 @@ describe('The server', () => {
       callback(null, { potato: true });
 
       expect(spy).toHaveBeenCalled();
+    });
+
+    it('should return the new socket.io server', () => {
+      const result = server(8080);
+      expect(result).toBe(emitter);
+    });
+
+    it('should send state on connection', () => {
+      const client = new Emitter();
+      const spy = createSpy();
+
+      server(8080);
+
+      client.on('state', spy);
+      emitter.emit('connection', client);
+
+      expect(spy).toHaveBeenCalledWith(state);
     });
 
   });
