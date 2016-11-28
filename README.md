@@ -36,10 +36,13 @@ Just follow the prompts.
 $ npm run setup
 ```
 
-Lastly, start the server.
+To start the server, you'll need to write a very small script. `illuminate-server` exports a function, you can pass a port number or an http server.
 
-```sh
-$ npm start
+```js
+import server from 'illuminate-server'
+
+const port = 8080
+server(port)
 ```
 
 You're golden! Now you can download any client drivers and point them to this server.
