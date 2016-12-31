@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "build": "babel src/ -d dist/",
     "prepublish": "npm run build",
-    "lint": "eslint src/",
+    "lint": "eslint src/ web/",
     "fix-lint": "npm run lint -- --fix",
     "dev": "npm run build -- --watch",
     "test": "mocha 'src/**/*test.js' --opts mocha.opts",
@@ -20,17 +20,26 @@
   "devDependencies": {
     "babel-cli": "^6.16.0",
     "babel-eslint": "^7.0.0",
+    "babel-loader": "^6.2.10",
     "babel-plugin-transform-async-to-module-method": "^6.16.0",
     "babel-plugin-transform-runtime": "^6.15.0",
     "babel-preset-es2015": "^6.16.0",
+    "babel-preset-react": "^6.16.0",
     "babel-preset-stage-0": "^6.16.0",
     "babel-register": "^6.16.3",
     "eslint": "^3.7.1",
     "eslint-config-llama": "^3.0.0",
     "eslint-plugin-babel": "^3.3.0",
+    "eslint-plugin-react": "^6.8.0",
     "expect": "^1.20.2",
+    "express": "^4.14.0",
+    "ip": "^1.1.4",
     "mocha": "^3.1.1",
-    "proxyquire": "^1.7.10"
+    "proxyquire": "^1.7.10",
+    "react-hot-loader": "^3.0.0-beta.6",
+    "webpack": "^1.14.0",
+    "webpack-dev-middleware": "^1.9.0",
+    "webpack-hot-middleware": "^2.14.0"
   },
   "dependencies": {
     "axios": "^0.14.0",
@@ -39,6 +48,8 @@
     "chalk": "^1.1.3",
     "deep-diff": "^0.3.4",
     "hue-bridge-discovery": "^1.1.2",
+    "react": "^15.4.1",
+    "react-dom": "^15.3.2",
     "socket.io": "^1.6.0"
   }
 }

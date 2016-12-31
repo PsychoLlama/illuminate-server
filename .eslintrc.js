@@ -1,44 +1,26 @@
-'use strict';
-
 const eslint = exports;
 
-// What environments the code runs in.
 eslint.env = {
+  browser: true,
   node: true,
   es6: true,
-  commonjs: true,
 };
 
-// Default configs plus my personal fav.
 eslint.extends = [
-	'eslint:recommended',
-	'llama',
+  'eslint:recommended',
+  'plugin:react/recommended',
+  'llama',
 ];
 
-// Custom parser for draft-stage language features.
+// Adds support for cutting-edge JS features.
 eslint.parser = 'babel-eslint';
 
-// List of plugins.
 eslint.plugins = [
+  'react',
   'babel',
 ];
 
-// Enable ES module support.
+// Enable ES modules.
 eslint.parserOptions = {
   sourceType: 'module',
-};
-
-// Add custom rules here.
-eslint.rules = {
-
-  // JS:next specific rules.
-  "babel/generator-star-spacing": 'error',
-  "babel/new-cap": 'error',
-  "babel/array-bracket-spacing": 'error',
-  "babel/object-curly-spacing": ['error', 'always'],
-  "babel/object-shorthand": 'error',
-  "babel/arrow-parens": 'error',
-  "babel/no-await-in-loop": 'off',
-  "babel/flow-object-type": 'error',
-  "babel/func-params-comma-dangle": 'error',
 };

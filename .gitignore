@@ -5,6 +5,7 @@ keys.json
 
 # Built JS files.
 dist/
+static/bundle.js
 
 # Usually notes and concept files.
 *.ignore.*
