@@ -24,3 +24,14 @@ eslint.plugins = [
 eslint.parserOptions = {
   sourceType: 'module',
 };
+
+eslint.rules = {
+  'require-jsdoc': ['error', {
+    require: {
+      ArrowFunctionExpression: false,
+      FunctionDeclaration: true,
+      MethodDefinition: false,
+      ClassDeclaration: true,
+    },
+  }],
+};

@@ -1,13 +1,14 @@
 /* eslint-disable global-require */
 import React from 'react';
-import { AppContainer } from 'react-hot-loader';
+import store from './state';
 import { render } from 'react-dom';
-import Root from './components/Root';
+import { AppContainer } from 'react-hot-loader';
+import GroupList from './Groups/components/GroupList';
 
 const root = document.getElementById('root');
 
 const app = <AppContainer>
-  <Root />
+  <GroupList store={store} />
 </AppContainer>;
 
 render(app, root);
@@ -15,7 +16,7 @@ render(app, root);
 // Webpack hot-reloading configuration.
 if (module.hot) {
   module.hot.accept('./components/Root', () => {
-    const NextApp = require('./components/Root').default;
+    const NextApp = require('./Groups/components/GroupList').default;
     render(
       <AppContainer>
          <NextApp />

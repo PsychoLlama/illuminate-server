@@ -11,7 +11,9 @@
     "lint": "eslint src/ web/",
     "fix-lint": "npm run lint -- --fix",
     "dev": "npm run build -- --watch",
-    "test": "mocha 'src/**/*test.js' --opts mocha.opts",
+    "test": "mocha '{src,web}/**/*test.js' --opts mocha.opts",
+    "dev-server": "node web/dev-server.js",
+    "tdd": "npm run test -- --watch --reporter min",
     "setup": "node dist/setup/index.js"
   },
   "keywords": [],
@@ -27,6 +29,7 @@
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-0": "^6.16.0",
     "babel-register": "^6.16.3",
+    "enzyme": "^2.7.0",
     "eslint": "^3.7.1",
     "eslint-config-llama": "^3.0.0",
     "eslint-plugin-babel": "^3.3.0",
@@ -34,8 +37,10 @@
     "expect": "^1.20.2",
     "express": "^4.14.0",
     "ip": "^1.1.4",
+    "jsdom": "^9.9.1",
     "mocha": "^3.1.1",
     "proxyquire": "^1.7.10",
+    "react-addons-test-utils": "^15.4.1",
     "react-hot-loader": "^3.0.0-beta.6",
     "webpack": "^1.14.0",
     "webpack-dev-middleware": "^1.9.0",
@@ -50,6 +55,7 @@
     "hue-bridge-discovery": "^1.1.2",
     "react": "^15.4.1",
     "react-dom": "^15.3.2",
+    "redux": "^3.6.0",
     "socket.io": "^1.6.0"
   }
 }
