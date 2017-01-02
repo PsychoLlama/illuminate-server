@@ -15,11 +15,11 @@ render(app, root);
 
 // Webpack hot-reloading configuration.
 if (module.hot) {
-  module.hot.accept('./components/Root', () => {
+  module.hot.accept('./Groups/components/GroupList', () => {
     const NextApp = require('./Groups/components/GroupList').default;
     render(
       <AppContainer>
-         <NextApp />
+         <NextApp store={store} />
       </AppContainer>,
       root
     );
