@@ -30,6 +30,17 @@ module.exports = {
         path.join(__dirname, 'web'),
         path.join(__dirname, 'src'),
       ],
+    }, {
+      test: /\.s(c|a)ss$/,
+      loaders: ['style', 'css', 'sass'],
     }],
+  },
+
+  resolve: {
+    extensions: [
+      '',
+      '.js',
+      '.scss',
+    ],
   },
 };
