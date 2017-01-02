@@ -34,4 +34,5 @@ eslint.rules = {
       ClassDeclaration: true,
     },
   }],
+  'jsx-quotes': ['error', 'prefer-single']
 };
