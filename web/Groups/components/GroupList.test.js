@@ -1,7 +1,8 @@
 /* eslint-env mocha */
 import React from 'react';
 import { mount } from 'enzyme';
-import { createStore } from '../../test-mocks';
+import { reducer } from '../../state';
+import { createStore } from 'redux';
 import expect, { createSpy, spyOn } from 'expect';
 import proxyquire from 'proxyquire';
 
@@ -20,8 +21,9 @@ describe('A group list', () => {
   let store, list, subscribe;
 
   beforeEach(() => {
-    store = createStore({
-      lights: {},
+    store = createStore(reducer);
+    store.dispatch({
+      type: 'SET_GROUPS',
       groups: {
         1: {
           title: 'Lamp',
@@ -55,7 +57,10 @@ describe('A group list', () => {
 
   it('should watch for group updates', () => {
     const [fn] = subscribe.calls[0].arguments;
-    store.setState({ groups: {} });
+    store.dispatch({
+      type: 'SET_GROUPS',
+      groups: {},
+    });
     fn();
     const groups = list.find('Group');
     expect(groups.length).toBe(0);

@@ -5,6 +5,6 @@ const reducers = {
   groups,
 };
 
-const reducer = combineReducers(reducers);
+export const reducer = combineReducers(reducers);
 
 export default createStore(reducer);
