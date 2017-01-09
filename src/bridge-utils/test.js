@@ -107,7 +107,7 @@ describe('Hue bridge', () => {
       stop();
 
       expect(post).toHaveBeenCalledWith(url, {
-        devicetype: `illumination#${hostname()}`,
+        devicetype: `luminary#${hostname()}`,
       });
     });
 

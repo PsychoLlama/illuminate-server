@@ -56,7 +56,7 @@ export const connect = (endpoint, fn) => {
   const stop = poll({
     endpoint,
     method: 'post',
-    data: { devicetype: `illumination#${device}` },
+    data: { devicetype: `luminary#${device}` },
 
     callback (err, response) {
 

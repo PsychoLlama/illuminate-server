@@ -1,4 +1,4 @@
-# illuminate-server
+# luminary
 
 *Home IoT dashboard server*
 
@@ -18,8 +18,8 @@ Clients developed independently.
 First, download the server.
 
 ```sh
-$ git clone https://GitHub/PsychoLlama/illuminate-server
-$ cd illuminate-server
+$ git clone https://GitHub/PsychoLlama/luminary
+$ cd luminary
 ```
 
 Sweet. Now install the dependencies.
@@ -36,10 +36,10 @@ Just follow the prompts.
 $ npm run setup
 ```
 
-To start the server, you'll need to write a very small script. `illuminate-server` exports a function, you can pass a port number or an http server.
+To start the server, you'll need to write a very small script. `luminary` exports a function, you can pass a port number or an http server.
 
 ```js
-import server from 'illuminate-server'
+import server from 'luminary'
 
 const port = 8080
 server(port)
