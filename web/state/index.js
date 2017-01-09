@@ -1,5 +1,5 @@
 import { createStore, combineReducers } from 'redux';
-import groups from '../Groups/reducer';
+import { reducer as groups } from '../components/GroupList';
 
 const reducers = {
   groups,
