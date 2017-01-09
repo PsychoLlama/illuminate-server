@@ -1,4 +1,2 @@
 --check-leaks
 --require babel-register
---require ./web/setup-test-env.js
---globals document,window
