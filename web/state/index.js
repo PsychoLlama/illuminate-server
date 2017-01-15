@@ -1,10 +1,13 @@
+/* eslint-disable no-underscore-dangle */
 import { createStore, combineReducers } from 'redux';
 import { reducer as groups } from '../components/GroupList';
 
-const reducers = {
+export const reducer = combineReducers({
+  lights: (lights = {}) => lights,
   groups,
-};
+});
 
-export const reducer = combineReducers(reducers);
+const initialState = global.__INITIAL_APP_STATE__;
+const store = createStore(reducer, initialState);
 
-export default createStore(reducer);
+export default store;

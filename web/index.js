@@ -2,31 +2,26 @@
 import React from 'react';
 import store from './state';
 import { render } from 'react-dom';
-import { Provider } from 'react-redux';
 import { AppContainer } from 'react-hot-loader';
-import GroupList from './components/GroupList';
+import App from './components/App';
 
 const root = document.getElementById('root');
 
 const app = <AppContainer>
-  <Provider store={store}>
-    <GroupList />
-  </Provider>
+  <App store={store} />
 </AppContainer>;
 
 render(app, root);
 
-// Webpack hot-reloading configuration.
+// Webpack hot module replacement config.
 if (module.hot) {
-  module.hot.accept(['./components/GroupList', './state'], () => {
-    const NextApp = require('./components/GroupList').default;
+  module.hot.accept(['./components/App', './state'], () => {
+    const NextApp = require('./components/App').default;
     const nextStore = require('./state').default;
 
     render(
       <AppContainer>
-        <Provider store={nextStore}>
-          <NextApp />
-        </Provider>
+        <NextApp store={nextStore} />
       </AppContainer>,
       root
     );
