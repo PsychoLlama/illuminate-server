@@ -2,13 +2,16 @@
 import React from 'react';
 import store from './state';
 import { render } from 'react-dom';
+import { Provider } from 'react-redux';
 import { AppContainer } from 'react-hot-loader';
 import GroupList from './components/GroupList';
 
 const root = document.getElementById('root');
 
 const app = <AppContainer>
-  <GroupList store={store} />
+  <Provider store={store}>
+    <GroupList />
+  </Provider>
 </AppContainer>;
 
 render(app, root);
@@ -21,7 +24,9 @@ if (module.hot) {
 
     render(
       <AppContainer>
-         <NextApp store={nextStore} />
+        <Provider store={nextStore}>
+          <NextApp />
+        </Provider>
       </AppContainer>,
       root
     );

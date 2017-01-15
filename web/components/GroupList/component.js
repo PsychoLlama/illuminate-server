@@ -1,52 +1,30 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
+import { connect } from 'react-redux';
 import Group from '../Group';
 
-const toGroupElement = ([name, data]) => <Group
-  {...data}
-  key={name}
-/>;
+// Turns a key-value pair into a <Group> component.
+const toGroupElement = ([name, data]) => (
+  <Group {...data} key={name} />
+);
 
 /**
  * Renders and updates a list of groups.
  * @class
  */
-export default class GroupList extends Component {
-  static propTypes = {
-    store: PropTypes.shape({
-      dispatch: PropTypes.func,
-      getState: PropTypes.func,
-    }).isRequired,
-  }
+export const GroupList = ({ groups }) => {
 
-  constructor ({ store }) {
-    super();
+  const groupComponents = Object
+    .entries(groups)
+    .map(toGroupElement);
 
-    const { groups } = store.getState();
+  return <div>{groupComponents}</div>;
+};
 
-    this.state = { groups };
-  }
+GroupList.propTypes = {
+  groups: PropTypes.object.isRequired,
+};
 
-  componentWillMount () {
-    const { store } = this.props;
-
-    this.unsubscribe = store.subscribe(() => {
-      const { groups } = store.getState();
-      this.setState({ groups });
-    });
-  }
-
-  componentWillUnmount () {
-    this.unsubscribe();
-  }
-
-  renderGroups (groups) {
-    const pairs = Object.entries(groups);
-    return pairs.map(toGroupElement);
-  }
-
-  render () {
-    return <div>
-      {this.renderGroups(this.state.groups)}
-    </div>;
-  }
-}
+/** Bind <GroupList> to redux. */
+export default connect(
+  ({ groups }) => ({ groups })
+)(GroupList);

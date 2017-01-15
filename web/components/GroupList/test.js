@@ -2,8 +2,9 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import expect from 'expect';
-import { createStore, combineReducers } from 'redux';
-import GroupList, { reducer, constants } from './index';
+import { createStore } from 'redux';
+import { reducer, constants } from './index';
+import { GroupList } from './component';
 
 describe('The GroupList reducer', () => {
   let store;
@@ -70,36 +71,14 @@ describe('The GroupList reducer', () => {
 });
 
 describe('A collection of groups', () => {
-  let store, list;
 
-  beforeEach(() => {
-    const appReducer = combineReducers({ groups: reducer });
+  it('should show every group', () => {
+    const data = {
+      1: { name: 'Hall' },
+      2: { name: 'Lamp' },
+    };
 
-    const group = { name: 'Hall' };
-    const groups = { 1: group };
-
-    store = createStore(appReducer, { groups });
-    list = shallow(<GroupList store={store} />);
-  });
-
-  it('should contain every group', () => {
-    const groups = list.find('Group');
-
-    const { length } = groups;
-    const error = `Unexpected number of <Group> elements (${length})`;
-
-    expect(length).toBe(1, error);
-  });
-
-  it('should react to changes', () => {
-    store.dispatch({
-      type: constants.SET_GROUPS,
-      groups: {
-        1: { name: 'Hall' },
-        2: { name: 'Lamp' },
-      },
-    });
-
+    const list = shallow(<GroupList groups={data} />);
     const groups = list.find('Group');
     const msg = 'Failed to add new group.';
     expect(groups.length).toBe(2, msg);
@@ -107,11 +86,9 @@ describe('A collection of groups', () => {
 
   it('should pass group data to <Group> elements', () => {
     const data = { name: 'Hall', type: 'Room', lights: [] };
-    store.dispatch({
-      type: constants.SET_GROUPS,
-      groups: { 'unique-id': data },
-    });
+    const groups = { 'unique-id': data };
 
+    const list = shallow(<GroupList groups={groups} />);
     const props = list.find('Group').props();
     expect(props).toContain(data);
   });
