@@ -15,6 +15,7 @@ export const GroupList = ({ groups }) => {
 
   const groupComponents = Object
     .entries(groups)
+    .filter(([, group]) => group.type === 'Room')
     .map(toGroupElement);
 
   return <div>{groupComponents}</div>;
