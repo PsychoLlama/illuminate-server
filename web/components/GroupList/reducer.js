@@ -16,7 +16,7 @@ export default (groups = {}, action) => {
   /** Update a single group. */
   case constants.SET_GROUP: return {
     ...groups,
-    [action.name]: action.group,
+    [action.id]: action.group,
   };
 
   /** Do nothing. */

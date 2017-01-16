@@ -1,6 +1,7 @@
 import GroupList from './component';
 
-export reducer from './reducer';
 export * as constants from './constants';
+export * as actions from './actions';
+export reducer from './reducer';
 
 export default GroupList;

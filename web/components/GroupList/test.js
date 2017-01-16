@@ -1,9 +1,10 @@
 /* eslint-env mocha */
-import React from 'react';
+import { createStore } from 'redux';
 import { shallow } from 'enzyme';
 import expect from 'expect';
-import { createStore } from 'redux';
-import { reducer, constants } from './index';
+import React from 'react';
+
+import { reducer, actions } from './index';
 import { GroupList } from './component';
 
 describe('The GroupList reducer', () => {
@@ -23,10 +24,8 @@ describe('The GroupList reducer', () => {
     it('should set group state', () => {
       const groups = { overriden: true };
 
-      store.dispatch({
-        type: constants.SET_GROUPS,
-        groups,
-      });
+      const action = actions.setGroups(groups);
+      store.dispatch(action);
 
       const state = store.getState();
       expect(state).toEqual(groups);
@@ -39,11 +38,8 @@ describe('The GroupList reducer', () => {
     it('should not replace other groups', () => {
       const store = createStore(reducer, { existing: 'group' });
 
-      store.dispatch({
-        type: constants.SET_GROUP,
-        group: { updated: true },
-        name: 'groupName',
-      });
+      const action = actions.setGroup('groupName', { updated: true });
+      store.dispatch(action);
 
       const state = store.getState();
 
@@ -54,11 +50,8 @@ describe('The GroupList reducer', () => {
     });
 
     it('should set the group given', () => {
-      store.dispatch({
-        type: constants.SET_GROUP,
-        group: { name: 'Hall' },
-        name: 1,
-      });
+      const action = actions.setGroup(1, { name: 'Hall' });
+      store.dispatch(action);
 
       const state = store.getState();
       expect(state).toEqual({
