@@ -4,8 +4,8 @@ import { Router } from 'express';
 import React from 'react';
 
 import { state } from '../../src/index';
-import App from '../components/App';
-import { reducer } from '../state';
+import App from '../web/components/App';
+import { reducer } from '../web/state';
 
 const renderFullPage = (app) => `
 <!DOCTYPE html>

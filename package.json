@@ -8,13 +8,13 @@
     "prepublish": "npm run build",
     "start": "node dist/index.js",
     "build": "babel src/ -d dist/",
-    "test": "mocha '{src,web}/**/*test.js' --opts mocha.opts",
-    "lint": "eslint src/ web/",
+    "test": "mocha 'src/**/*test.js' --opts mocha.opts",
+    "lint": "eslint src/",
     "setup": "node dist/setup/index.js",
     "tdd": "npm run test -- --watch --reporter min",
     "dev-setup": "babel-node src/setup/index.js",
     "dev-build": "npm run build -- --watch",
-    "dev-server": "babel-node web/server/development.js"
+    "dev-server": "babel-node src/server/development.js"
   },
   "keywords": [],
   "author": "Jesse Gibson <jesse@gundb.io> (http://techllama.com)",

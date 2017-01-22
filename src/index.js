@@ -1,4 +1,4 @@
-import server from './server';
+import server from './luminary';
 
-export { state } from './server';
+export { state } from './luminary';
 export default server;
