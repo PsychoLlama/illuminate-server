@@ -6,10 +6,10 @@ import hotMiddleware from 'webpack-hot-middleware';
 import webpack from 'webpack';
 import express from 'express';
 
-import { PORT, HOST } from '../../env/development';
-import config from '../../webpack.config';
-import Luminary from '../index';
+import { PORT, HOST } from '../../env/dev.vars';
+import config from '../../env/dev.webpack';
 import appRouter from './routes';
+import Luminary from '../index';
 
 const app = express();
 const server = Server(app);

@@ -1,24 +1,16 @@
-const webpack = require('webpack');
 const path = require('path');
 
+const webpack = require('webpack');
+
 module.exports = {
-  devtool: 'cheap-module-source-map',
-
-  entry: [
-    'react-hot-loader/patch',
-    'webpack-hot-middleware/client',
-    path.join(__dirname, './src/web/index'),
-  ],
-
   output: {
-    path: path.join(__dirname, 'static'),
+    path: path.join(__dirname, '../'),
     filename: 'bundle.js',
     publicPath: '/',
   },
 
   plugins: [
     new webpack.optimize.OccurenceOrderPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin(),
   ],
 
@@ -26,13 +18,11 @@ module.exports = {
     loaders: [{
       test: /\.js$/,
       loaders: ['babel'],
-      include: [
-        path.join(__dirname, 'web'),
-        path.join(__dirname, 'src'),
-      ],
+      exclude: path.join(__dirname, '../node_modules'),
     }, {
       test: /\.s(c|a)ss$/,
       loaders: ['style', 'css', 'sass'],
+      exclude: path.join(__dirname, '../node_modules'),
     }],
   },
 

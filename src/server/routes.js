@@ -1,3 +1,5 @@
+import { join } from 'path';
+
 import { renderToString } from 'react-dom/server';
 import { createStore } from 'redux';
 import { Router } from 'express';
@@ -34,6 +36,9 @@ const renderFullPage = (app) => `
 `;
 
 const router = Router();
+
+const bundlePath = join(__dirname, '../../bundle.js');
+router.get('/bundle.js', (req, res) => res.sendFile(bundlePath));
 
 router.get('/*', (req, res) => {
   const store = createStore(reducer, state);

@@ -1,11 +1,10 @@
 node_modules/
 .DS_Store
 npm-debug.log
-keys.json
 
 # Built JS files.
 dist/
-static/bundle.js
+bundle.js
 *.map
 
 # Usually notes and concept files.
