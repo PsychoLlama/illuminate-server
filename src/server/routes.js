@@ -3,9 +3,9 @@ import { createStore } from 'redux';
 import { Router } from 'express';
 import React from 'react';
 
-import { state } from '../../src/index';
 import App from '../web/components/App';
 import { reducer } from '../web/state';
+import { state } from '../index';
 
 const renderFullPage = (app) => `
 <!DOCTYPE html>

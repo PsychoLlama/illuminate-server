@@ -8,7 +8,7 @@ import express from 'express';
 
 import { PORT, HOST } from '../../env/development';
 import config from '../../webpack.config';
-import Luminary from '../../src/index';
+import Luminary from '../index';
 import appRouter from './routes';
 
 const app = express();
