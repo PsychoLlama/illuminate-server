@@ -1,16 +1,15 @@
 import diff, { applyChange } from 'deep-diff';
+import Server from 'socket.io';
+import axios from 'axios';
+
 import { baseURL } from '../setup/result';
 import poll from '../poll';
-import Server from 'socket.io';
 
 /**
- * Global, in-memory hue state.
+ * Global, in-memory hue state. Mutates over time.
  * @type {Object}
  */
-export const state = {
-  lights: {},
-  groups: {},
-};
+export const state = {};
 
 /**
  * Create a callback that detects changes between two objects.
@@ -88,31 +87,41 @@ const listeners = {
   groups: [],
 };
 
-poll({
-  endpoint: `${baseURL}/lights`,
-  interval: 500,
-  callback: detectChange(
-    state.lights,
-    handleChange(
-      listeners.lights,
-      'lights',
-      state.lights
-    )
-  ),
-});
+(async () => {
 
-poll({
-  endpoint: `${baseURL}/groups`,
-  interval: 500,
-  callback: detectChange(
-    state.groups,
-    handleChange(
-      listeners.groups,
-      'groups',
-      state.groups
-    )
-  ),
-});
+  /** Provide the initial state. */
+  const { data } = await axios.get(baseURL);
+  Object.assign(state, data);
+
+  /** Poll for light updates. */
+  poll({
+    endpoint: `${baseURL}/lights`,
+    interval: 500,
+    callback: detectChange(
+      state.lights,
+      handleChange(
+        listeners.lights,
+        'lights',
+        state.lights
+      )
+    ),
+  });
+
+  /** Poll for group updates. */
+  poll({
+    endpoint: `${baseURL}/groups`,
+    interval: 500,
+    callback: detectChange(
+      state.groups,
+      handleChange(
+        listeners.groups,
+        'groups',
+        state.groups
+      )
+    ),
+  });
+
+})();
 
 /**
  * Begins a websocket server, emitting real-time bridge updates.
@@ -125,11 +134,6 @@ export default (config) => {
   /** Subscribe to bridge changes. */
   listeners.lights.push(server);
   listeners.groups.push(server);
-
-  /** Send the bridge state on connection. */
-  server.on('connection', (socket) => {
-    socket.emit('state', state);
-  });
 
   return server;
 };

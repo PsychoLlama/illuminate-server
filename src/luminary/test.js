@@ -8,6 +8,14 @@ import Emitter from 'events';
 const mock = {
   poll: createSpy(),
   io: createSpy(),
+  axios: {
+    get: async () => ({
+      data: {
+        lights: {},
+        groups: {},
+      },
+    }),
+  },
 };
 
 mock.io.listen = mock.io;
@@ -21,6 +29,7 @@ const {
 } = proxy.noCallThru().load('./index', {
   '../poll': mock.poll,
   'socket.io': mock.io,
+  'axios': mock.axios,
   '../setup/result': {
     baseURL: 'http://fake-url.internetz',
   },
@@ -184,18 +193,6 @@ describe('The server', () => {
     it('should return the new socket.io server', () => {
       const result = server(8080);
       expect(result).toBe(emitter);
-    });
-
-    it('should send state on connection', () => {
-      const client = new Emitter();
-      const spy = createSpy();
-
-      server(8080);
-
-      client.on('state', spy);
-      emitter.emit('connection', client);
-
-      expect(spy).toHaveBeenCalledWith(state);
     });
 
   });
