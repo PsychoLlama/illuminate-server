@@ -9,6 +9,11 @@ import App from '../web/components/App';
 import { reducer } from '../web/state';
 import { state } from '../index';
 
+const getBrowserStateSubset = ({ lights, groups }) => ({
+  lights,
+  groups,
+});
+
 const renderFullPage = (app) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -25,7 +30,7 @@ const renderFullPage = (app) => `
   <script>
     /* Preloaded application state. */
     window.__INITIAL_APP_STATE__ = ${
-      JSON.stringify(state)
+      JSON.stringify(getBrowserStateSubset(state))
     }
   </script>
 
@@ -41,7 +46,7 @@ const bundlePath = join(__dirname, '../../bundle.js');
 router.get('/bundle.js', (req, res) => res.sendFile(bundlePath));
 
 router.get('/*', (req, res) => {
-  const store = createStore(reducer, state);
+  const store = createStore(reducer, getBrowserStateSubset(state));
   const app = renderToString(<App store={store} />);
   const homepage = renderFullPage(app);
 
