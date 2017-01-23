@@ -1,13 +1,8 @@
-/* eslint-disable no-underscore-dangle */
-import { createStore, combineReducers } from 'redux';
-import { reducer as groups } from '../components/GroupList';
+/* eslint-disable no-underscore-dangle, global-require */
+import { createStore } from 'redux';
+import reducer from './reducer';
 
-export const reducer = combineReducers({
-  lights: (lights = {}) => lights,
-  groups,
-});
-
-const ReduxDevTools = global.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
+const ReduxDevTools = global.__REDUX_DEVTOOLS_EXTENSION__;
 let devTools;
 
 if (ReduxDevTools instanceof Function) {
@@ -18,3 +13,11 @@ const initialState = global.__INITIAL_APP_STATE__;
 const store = createStore(reducer, initialState, devTools);
 
 export default store;
+
+// Hot-replace reducers.
+if (module.hot) {
+  module.hot.accept(['./reducer'], () => {
+    const reducer = require('./reducer').default;
+    store.replaceReducer(reducer);
+  });
+}

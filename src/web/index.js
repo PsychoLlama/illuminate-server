@@ -1,9 +1,10 @@
 /* eslint-disable global-require */
-import React from 'react';
-import store from './state';
-import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
+import { render } from 'react-dom';
+import React from 'react';
+
 import App from './components/App';
+import store from './state';
 
 const root = document.getElementById('root');
 
@@ -15,13 +16,12 @@ render(app, root);
 
 // Webpack hot module replacement config.
 if (module.hot) {
-  module.hot.accept(['./components/App', './state'], () => {
+  module.hot.accept(['./components/App'], () => {
     const NextApp = require('./components/App').default;
-    const nextStore = require('./state').default;
 
     render(
       <AppContainer>
-        <NextApp store={nextStore} />
+        <NextApp store={store} />
       </AppContainer>,
       root
     );
