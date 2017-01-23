@@ -4,12 +4,10 @@ import Server from 'socket.io';
 import axios from 'axios';
 
 import { baseURL } from '../setup/result';
-import db from '../database';
 import poll from '../poll';
 import {
   createChangeDetector,
   applyUpdateTo,
-  getColorFromState,
 } from './util';
 
 /**
@@ -17,39 +15,19 @@ import {
  * @type {Object}
  */
 export const state = {};
+
+/**
+ * Emits as polling-related updates occur.
+ * @type {EventEmitter}
+ */
 export const events = new Emitter();
-
-/** Add changes to the database. */
-events.on('update', async (type, changes) => {
-  if (type !== 'lights') {
-    return;
-  }
-
-  // Query for pushing light states into history.
-  const insert = `
-  INSERT INTO history (light, color, time)
-  VALUES ($1::text, $2::text, NOW());
-  `;
-
-  changes.forEach((change) => {
-
-    // Get the light which changed.
-    const [lightIndex] = change.path;
-    const light = state.lights[lightIndex];
-
-    // Get its unique id and current color.
-    const { uniqueid } = light;
-    const color = getColorFromState(light.state);
-
-    db.query(insert, [uniqueid, color]);
-
-  });
-
-});
-
 events.setMaxListeners(Infinity);
 
-(async () => {
+/**
+ * Resolves when the initial state has loaded.
+ * @type {Promise}
+ */
+export const stateLoaded = (async () => {
 
   /** Provide the initial state. */
   const { data } = await axios.get(baseURL);
@@ -71,7 +49,7 @@ events.setMaxListeners(Infinity);
   /** Poll for group updates. */
   poll({
     endpoint: `${baseURL}/groups`,
-    interval: 500,
+    interval: 2500,
     callback: handleUpdatesForField('groups'),
   });
 
@@ -85,8 +63,9 @@ events.setMaxListeners(Infinity);
 export default (config) => {
   const server = new Server(config);
 
-  const broadcast = (type, change) => {
-    server.emit(`change:${type}`, change);
+  const broadcast = (type) => {
+    const value = state[type];
+    server.emit(`change:${type}`, value);
   };
 
   /** Forward bridge changes to clients. */

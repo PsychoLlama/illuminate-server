@@ -14,6 +14,6 @@ const schema = `
 `;
 
 // Create a table to store light history.
-pool.query(`
-  CREATE TABLE IF NOT EXISTS history ${schema};
-`);
+export const initDatabase = () => pool.query(
+  `CREATE TABLE IF NOT EXISTS history ${schema};`
+);
