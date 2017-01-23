@@ -59,10 +59,13 @@
     "chalk": "^1.1.3",
     "deep-diff": "^0.3.4",
     "hue-bridge-discovery": "^1.1.2",
+    "pg": "^6.1.2",
+    "pg-pool": "^1.6.0",
     "react": "^15.4.1",
     "react-dom": "^15.3.2",
     "react-redux": "^5.0.2",
     "redux": "^3.6.0",
-    "socket.io": "^1.6.0"
+    "socket.io": "^1.6.0",
+    "tinycolor2": "^1.4.1"
   }
 }

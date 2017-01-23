@@ -1,91 +1,53 @@
-import diff, { applyChange } from 'deep-diff';
+import Emitter from 'events';
+
 import Server from 'socket.io';
 import axios from 'axios';
 
 import { baseURL } from '../setup/result';
+import db from '../database';
 import poll from '../poll';
+import {
+  createChangeDetector,
+  applyUpdateTo,
+  getColorFromState,
+} from './util';
 
 /**
  * Global, in-memory hue state. Mutates over time.
  * @type {Object}
  */
 export const state = {};
+export const events = new Emitter();
 
-/**
- * Create a callback that detects changes between two objects.
- * @param  {Object} state - A state to compare.
- * @param  {Function} callback - A function to call when data changes.
- * @return {Function} - Node-style callback that detects and
- * fires change events.
- */
-export const detectChange = (state, callback) => (
-
-  /**
-   * Detects and emits change events.
-   * @param  {Error} [err] - Any errors that happen.
-   * @param  {Object} update - A new state to compare against the current.
-   * @return {undefined}
-   */
-  (err, update) => {
-    const change = diff(state, update);
-
-    if (!err && change) {
-      callback(change, update);
-    }
+/** Add changes to the database. */
+events.on('update', async (type, changes) => {
+  if (type !== 'lights') {
+    return;
   }
-);
 
-/**
- * Mutates the current state, recursively applying updates.
- * @param  {Object} state - The current state to mutate.
- * @param  {Object} update - A newer state.
- * @param  {Array} changes - A list of changes between them.
- * @return {Array} - The list of changes.
- */
-export const mergeChanges = (state, update, changes) => {
+  // Query for pushing light states into history.
+  const insert = `
+  INSERT INTO history (light, color, time)
+  VALUES ($1::text, $2::text, NOW());
+  `;
+
   changes.forEach((change) => {
-    applyChange(state, update, change);
+
+    // Get the light which changed.
+    const [lightIndex] = change.path;
+    const light = state.lights[lightIndex];
+
+    // Get its unique id and current color.
+    const { uniqueid } = light;
+    const color = getColorFromState(light.state);
+
+    db.query(insert, [uniqueid, color]);
+
   });
 
-  return changes;
-};
+});
 
-/**
- * Creates a callback that updates local state and broadcasts changes.
- * @param  {EventEmitter[]} emitters - A list of emitters to call
- * (made for socket.io servers).
- * @param  {String} type - The change type to emit on (e.g., "lights").
- * @param  {Object} state - The state object to mutate.
- * @return {undefined}
- */
-export const handleChange = (emitters, type, state) => (
-
-  /**
-   * Merges updates into local state and broadcasts them.
-   * @param  {Array} changes - A list of changes.
-   * @param  {Object} update - The complete new state.
-   * @return {undefined}
-   */
-  (changes, update) => {
-
-    /** Update the local state. */
-    mergeChanges(state, update, changes);
-
-    /** Broadcast the change event. */
-    emitters.forEach((emitter) => {
-      emitter.emit(`change:${type}`, changes);
-    });
-  }
-);
-
-/**
- * Routes mapped to emitters that should be fired on change.
- * @type {Object}
- */
-const listeners = {
-  lights: [],
-  groups: [],
-};
+events.setMaxListeners(Infinity);
 
 (async () => {
 
@@ -93,32 +55,24 @@ const listeners = {
   const { data } = await axios.get(baseURL);
   Object.assign(state, data);
 
+  const updateField = applyUpdateTo(state, events);
+  const handleUpdatesForField = (field) => createChangeDetector(
+    state[field],
+    updateField(field)
+  );
+
   /** Poll for light updates. */
   poll({
     endpoint: `${baseURL}/lights`,
     interval: 500,
-    callback: detectChange(
-      state.lights,
-      handleChange(
-        listeners.lights,
-        'lights',
-        state.lights
-      )
-    ),
+    callback: handleUpdatesForField('lights'),
   });
 
   /** Poll for group updates. */
   poll({
     endpoint: `${baseURL}/groups`,
     interval: 500,
-    callback: detectChange(
-      state.groups,
-      handleChange(
-        listeners.groups,
-        'groups',
-        state.groups
-      )
-    ),
+    callback: handleUpdatesForField('groups'),
   });
 
 })();
@@ -126,14 +80,34 @@ const listeners = {
 /**
  * Begins a websocket server, emitting real-time bridge updates.
  * @param  {Number|Server} config - Passed to socket.io as the server.
- * @return {undefined}
+ * @return {Object} - Server interfaces for greater control.
  */
 export default (config) => {
   const server = new Server(config);
 
-  /** Subscribe to bridge changes. */
-  listeners.lights.push(server);
-  listeners.groups.push(server);
+  const broadcast = (type, change) => {
+    server.emit(`change:${type}`, change);
+  };
 
-  return server;
+  /** Forward bridge changes to clients. */
+  events.on('update', broadcast);
+
+  return {
+
+    /**
+     * Socket.io server.
+     * @type {io.Server}
+     */
+    io: server,
+
+    /**
+     * Stops listening for bridge changes.
+     * @method dispose
+     * @return {undefined}
+     */
+    dispose: () => {
+      events.removeListener('update', broadcast);
+    },
+
+  };
 };

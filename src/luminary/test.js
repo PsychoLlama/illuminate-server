@@ -1,198 +1,243 @@
 /* eslint-env mocha */
-import expect, { createSpy } from 'expect';
-import proxy from 'proxyquire';
-import diff from 'deep-diff';
 import Emitter from 'events';
 
-// Mocks.
-const mock = {
-  poll: createSpy(),
-  io: createSpy(),
-  axios: {
-    get: async () => ({
-      data: {
-        lights: {},
-        groups: {},
-      },
-    }),
-  },
-};
+import diff from 'deep-diff';
 
-mock.io.listen = mock.io;
+import * as util from './util';
+import expect, { createSpy } from 'expect';
 
-const {
-  default: server,
-  detectChange,
-  mergeChanges,
-  handleChange,
-  state,
-} = proxy.noCallThru().load('./index', {
-  '../poll': mock.poll,
-  'socket.io': mock.io,
-  'axios': mock.axios,
-  '../setup/result': {
-    baseURL: 'http://fake-url.internetz',
-  },
-});
+describe('Luminary utility', () => {
+  let state;
 
-describe('The server', () => {
-
-  beforeEach(() => mock.io.reset());
   beforeEach(() => {
-    state.lights = {};
-    state.groups = {};
+    state = {
+      on: true,
+      hue: 0,
+      sat: 0,
+      bri: 254,
+    };
   });
 
-  describe('state', () => {
+  const max = {
+    hue: 0xffff,
+    sat: 254,
+    bri: 254,
+  };
 
-    it('should contain Hue information', () => {
-      expect(state.lights).toBeAn(Object);
-      expect(state.groups).toBeAn(Object);
+  const min = {
+    hue: 0,
+    sat: 0,
+    bri: 1,
+  };
+
+  describe('"getHuePercentage"', () => {
+
+    it('should return 0 when the hue is at minimum', () => {
+      const hue = util.getHuePercentage(min.hue);
+      expect(hue).toBe(0);
     });
 
-  });
-
-  describe('change detector', () => {
-    const state = {};
-    const spy = createSpy();
-
-    beforeEach(::spy.reset);
-
-    it('should not fire if no changes happen', () => {
-      const detector = detectChange(state, spy);
-
-      detector(null, state);
-
-      expect(spy).toNotHaveBeenCalled();
+    it('should return 1 when the hue is maxed out', () => {
+      const hue = util.getHuePercentage(max.hue);
+      expect(hue).toBe(1);
     });
 
-    it('should fire if changes happen', () => {
-      const detector = detectChange(state, spy);
-      const update = { 'new-property': true };
-
-      detector(null, update);
-
-      expect(spy).toHaveBeenCalled();
-    });
-
-    it('should not detect changes if an error occurs', () => {
-      const detector = detectChange(state, spy);
-
-      const error = new Error('Testing if the diff happens if error');
-      detector(error);
-
-      expect(spy).toNotHaveBeenCalled();
-    });
-
-    it('should provide the state and it\'s changes to the callback', () => {
-      const detector = detectChange(state, spy);
-      const update = { things: 'yeah, probably' };
-      const changes = diff(state, update);
-
-      detector(null, update);
-
-      const args = spy.calls[0].arguments;
-      expect(args).toEqual([changes, update]);
+    it('should return 0.5 when hue is half', () => {
+      const hue = util.getHuePercentage(max.hue / 2);
+      expect(hue).toBe(0.5);
     });
 
   });
 
-  describe('change merger', () => {
-    let state, update;
+  describe('"getBriPercentage"', () => {
+
+    it('should return 1 at max brightness', () => {
+      const bri = util.getBriPercentage(max.bri);
+      expect(bri).toBe(1);
+    });
+
+    it('should not return zero at minimum brightness', () => {
+      const bri = util.getBriPercentage(min.bri);
+      expect(bri).toBeGreaterThan(0);
+    });
+
+    it('should return 0.5 at half brightness', () => {
+      const bri = util.getBriPercentage(max.bri / 2);
+      expect(bri).toBe(0.5);
+    });
+
+  });
+
+  describe('"getSatPercentage"', () => {
+
+    it('should return 1 at max saturation', () => {
+      const bri = util.getSatPercentage(max.sat);
+      expect(bri).toBe(1);
+    });
+
+    it('should return zero at minimum saturation', () => {
+      const bri = util.getSatPercentage(min.sat);
+      expect(bri).toBe(0);
+    });
+
+    it('should return 0.5 at half saturation', () => {
+      const bri = util.getSatPercentage(max.sat / 2);
+      expect(bri).toBe(0.5);
+    });
+
+  });
+
+  describe('"getColorFromState"', () => {
+
+    it('should return a string', () => {
+      const hex = util.getColorFromState(state);
+      expect(hex).toBeA('string');
+    });
+
+    it('should return "ffffff" when given white rgb', () => {
+      const hex = util.getColorFromState(state);
+      expect(hex).toBe('ffffff');
+    });
+
+    it('should return "000000" when light is off', () => {
+      const hex = util.getColorFromState({ ...state, on: false });
+      expect(hex).toBe('000000');
+    });
+
+    // Regression test; assertions use previous output.
+    it('should return the correct hex code', () => {
+      expect(
+        util.getColorFromState({ on: true, hue: 100, sat: 100, bri: 100 })
+      ).toBe('8c3e3d');
+      expect(
+        util.getColorFromState({ on: true, hue: 20, sat: 30, bri: 40 })
+      ).toBe('2d2323');
+      expect(
+        util.getColorFromState({ on: true, hue: 35, sat: 250, bri: 3 })
+      ).toBe('060000');
+    });
+
+  });
+
+  describe('"mergeChanges"', () => {
+    let state, update, differences;
 
     beforeEach(() => {
-      state = { old: true };
-      update = { old: false };
+      state = {
+        lights: {},
+      };
+      update = {
+        lights: {
+          1: { name: 'Light #1' },
+          2: { name: 'Light #2' },
+        },
+      };
+      differences = diff(state, update);
     });
 
-    it('should mutate the original state', () => {
-      const changes = diff(state, update);
+    it('should mutate the given state object', () => {
+      const originalLightState = { ...state.lights };
+      util.mergeChanges(state, update, differences);
 
-      mergeChanges(state, update, changes);
+      expect(state.lights).toNotEqual(originalLightState);
+    });
 
+    it('should add the all changes', () => {
+      util.mergeChanges(state, update, differences);
       expect(state).toEqual(update);
     });
 
-    it('should return the list of changes', () => {
-      const changes = diff(state, update);
-
-      const result = mergeChanges(state, update, changes);
-
-      expect(result).toEqual(changes);
+    it('should not replace existing state', () => {
+      const light = { name: 'Light #3' };
+      state.lights[3] = light;
+      util.mergeChanges(state, update, differences);
+      expect(state.lights[3]).toEqual(light);
     });
 
   });
 
-  describe('change handler', () => {
-    let state, update, emitter;
-    const spy = createSpy();
-
-    beforeEach(::spy.reset);
+  describe('"createChangeDetector"', () => {
+    let state, update, spy, detectChange;
 
     beforeEach(() => {
-      state = { old: true };
-      update = { old: false };
-      emitter = new Emitter();
+      state = {
+        lights: {},
+      };
+      update = {
+        lights: {},
+      };
+      spy = createSpy();
+      detectChange = util.createChangeDetector(state, spy);
     });
 
-    it('should emit updates for changes', () => {
-      const handler = handleChange([emitter], 'event-name', state);
-      const changes = diff(state, update);
-
-      emitter.on('change:event-name', spy);
-
-      handler(changes, update);
-
-      expect(spy).toHaveBeenCalledWith(changes);
+    it('should not notify if no change has happened', () => {
+      detectChange(null, state);
+      expect(spy).toNotHaveBeenCalled();
     });
 
-    it('should update the current state', () => {
-      const handler = handleChange([emitter], 'stuff', state);
-      const changes = diff(state, update);
-
-      expect(state).toNotEqual(update);
-
-      handler(changes, update);
-
-      expect(state).toEqual(update);
-    });
-
-  });
-
-  describe('factory', () => {
-    let emitter;
-
-    beforeEach(() => {
-      emitter = new Emitter();
-      emitter.sockets = emitter;
-
-      mock.io.andReturn(emitter);
-    });
-
-    it('should mount a socket server', () => {
-      server(8080);
-      expect(mock.io).toHaveBeenCalledWith(8080);
-    });
-
-    it('should send updates as they happen', () => {
-      server(8080);
-      const spy = createSpy();
-
-      const [callback] = mock.poll.calls
-        .map((call) => call.arguments[0])
-        .filter(({ endpoint }) => (/lights/).test(endpoint))
-        .map((args) => args.callback);
-
-      emitter.on('change:lights', spy);
-
-      callback(null, { potato: true });
-
+    it('should notify if changes happen', () => {
+      update.lights[1] = { name: 'Light #1' };
+      detectChange(null, update);
       expect(spy).toHaveBeenCalled();
     });
 
-    it('should return the new socket.io server', () => {
-      const result = server(8080);
-      expect(result).toBe(emitter);
+    // Bound to happen, and our app doesn't care.
+    it('should swallow errors', () => {
+      detectChange(new Error('This error should be swallowed.'));
+      expect(spy).toNotHaveBeenCalled();
+    });
+
+    it('should pass the update delta', () => {
+      update.lights[2] = { name: 'Light #2' };
+      const changes = diff(state, update);
+      detectChange(null, update);
+      const [differences] = spy.calls[0].arguments;
+      expect(differences).toEqual(changes);
+    });
+
+  });
+
+  describe('"applyUpdateTo"', () => {
+    let state, update, emitter, spy, applyChanges, changes;
+
+    beforeEach(() => {
+      state = {
+        lights: {},
+      };
+
+      update = {
+        lights: {
+          1: { name: 'Light #1' },
+        },
+      };
+
+      changes = diff(state, update);
+
+      emitter = new Emitter();
+      spy = createSpy();
+
+      emitter.on('update', spy);
+
+      applyChanges = util.applyUpdateTo(state, emitter)('lights');
+    });
+
+    it('should add the update to the current state', () => {
+      applyChanges(changes, update);
+
+      expect(state.lights).toEqual(update);
+    });
+
+    it('should emit an "update" event', () => {
+      expect(spy).toNotHaveBeenCalled();
+      applyChanges(changes, update);
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('should pass the type and deltas to the "update" event', () => {
+      applyChanges(changes, update);
+      const [type, diff] = spy.calls[0].arguments;
+      expect(type).toBe('lights');
+      expect(diff).toEqual(changes);
     });
 
   });
