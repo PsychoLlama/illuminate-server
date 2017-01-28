@@ -4,10 +4,12 @@ import thunk from 'redux-thunk';
 import reducer from './reducer';
 
 const ReduxDevTools = global.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
-let devTools;
+const enhancers = [
+  applyMiddleware(thunk),
+];
 
 if (ReduxDevTools instanceof Function) {
-  devTools = ReduxDevTools();
+  enhancers.push(ReduxDevTools());
 }
 
 const initialState = global.__INITIAL_APP_STATE__;
@@ -15,7 +17,7 @@ const initialState = global.__INITIAL_APP_STATE__;
 const store = createStore(
   reducer,
   initialState,
-  compose(applyMiddleware(thunk), devTools)
+  compose(...enhancers)
 );
 
 export default store;
