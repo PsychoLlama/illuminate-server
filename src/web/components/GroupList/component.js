@@ -10,24 +10,23 @@ import Group from '../Group';
  */
 export const GroupList = ({ groups, updateGroup }) => {
 
+  const toGroupComponent = ([id, data]) => (
+    <Group {...data} key={id} onClick={() => {
+      const on = data.state.any_on;
+      updateGroup(id, { on: !on });
+    }} />
+  );
   const groupComponents = Object
     .entries(groups)
     .filter(([, group]) => group.type === 'Room')
-    .map(
-      ([id, data]) => (
-        <Group {...data} key={id} onClick={() => {
-          const on = data.state.any_on;
-          updateGroup(id, { on: !on });
-        }} />
-      )
-    );
+    .map(toGroupComponent);
 
   return <div>{groupComponents}</div>;
 };
 
 GroupList.propTypes = {
   groups: PropTypes.object.isRequired,
-  updateGroup: PropTypes.func.isRequired,
+  updateGroup: PropTypes.func,
 };
 
 /** Bind <GroupList> to redux. */
