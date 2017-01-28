@@ -8,14 +8,15 @@ import GroupList from '../GroupList';
  * @param  {Object} props.store - A redux store.
  * @return {Component} - The main app component.
  */
-const App = ({ store }) => (
+const App = ({ store, socket }) => (
   <Provider store={store}>
-    <GroupList />
+    <GroupList socket={socket} />
   </Provider>
 );
 
 App.propTypes = {
   store: PropTypes.object.isRequired,
+  socket: PropTypes.object,
 };
 
 export default App;

@@ -1,8 +1,9 @@
 /* eslint-disable no-underscore-dangle, global-require */
-import { createStore } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
+import thunk from 'redux-thunk';
 import reducer from './reducer';
 
-const ReduxDevTools = global.__REDUX_DEVTOOLS_EXTENSION__;
+const ReduxDevTools = global.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
 let devTools;
 
 if (ReduxDevTools instanceof Function) {
@@ -10,7 +11,12 @@ if (ReduxDevTools instanceof Function) {
 }
 
 const initialState = global.__INITIAL_APP_STATE__;
-const store = createStore(reducer, initialState, devTools);
+
+const store = createStore(
+  reducer,
+  initialState,
+  compose(applyMiddleware(thunk), devTools)
+);
 
 export default store;
 

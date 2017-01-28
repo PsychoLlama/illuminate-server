@@ -68,6 +68,20 @@ export default (config) => {
     server.emit(`change:${type}`, value);
   };
 
+  server.on('connection', (socket) => {
+    socket.on('update:groups', async ({ group, state, requestId }) => {
+
+      // Send the update to the bridge.
+      try {
+        const url = `${baseURL}/groups/${group}/action`;
+        await axios.put(url, state);
+        socket.emit(requestId);
+      } catch (error) {
+        socket.emit(requestId, { message: error.message });
+      }
+    });
+  });
+
   /** Forward bridge changes to clients. */
   events.on('update', broadcast);
 

@@ -19,6 +19,15 @@ export default (groups = {}, action) => {
     [action.id]: action.group,
   };
 
+  /** Update the state on a group. */
+  case constants.SET_GROUP_STATE: return {
+    ...groups,
+    [action.group]: {
+      ...groups[action.group],
+      state: action.state,
+    },
+  };
+
   /** Do nothing. */
   default: return groups;
   }

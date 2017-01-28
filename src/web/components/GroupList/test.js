@@ -1,8 +1,11 @@
 /* eslint-env mocha */
 /* eslint-disable camelcase */
-import { createStore } from 'redux';
+import Emitter from 'events';
+
+import { createStore, applyMiddleware } from 'redux';
+import expect, { createSpy } from 'expect';
 import { shallow } from 'enzyme';
-import expect from 'expect';
+import thunk from 'redux-thunk';
 import React from 'react';
 
 import { reducer, actions } from './index';
@@ -34,19 +37,14 @@ const createFakeGroup = (settings = {}) => ({
   ...settings,
 });
 
-describe('The GroupList reducer', () => {
+describe('Action', () => {
   let store;
 
   beforeEach(() => {
-    store = createStore(reducer);
+    store = createStore(reducer, applyMiddleware(thunk));
   });
 
-  it('should default to an empty group collection', () => {
-    const state = store.getState();
-    expect(state).toEqual({});
-  });
-
-  context('SET_GROUPS action', () => {
+  context('setGroups', () => {
 
     it('should replace all group state', () => {
       const initialState = { 1: createFakeGroup() };
@@ -63,7 +61,7 @@ describe('The GroupList reducer', () => {
 
   });
 
-  context('SET_GROUP action', () => {
+  context('setGroup', () => {
 
     it('should not replace other groups', () => {
       const original = createFakeGroup({ name: 'Existing' });
@@ -86,6 +84,100 @@ describe('The GroupList reducer', () => {
 
       const state = store.getState();
       expect(state).toEqual({ 1: update });
+    });
+
+  });
+
+  describe('setGroupState', () => {
+
+    it('should update group state', () => {
+      const store = createStore(reducer, {
+        1: createFakeGroup({
+          state: { on: false },
+        }),
+      });
+
+      const action = actions.setGroupState(1, {
+        on: true,
+      });
+
+      store.dispatch(action);
+
+      const { state } = store.getState()[1];
+      expect(state).toContain({ on: true });
+    });
+
+  });
+
+  context('sendGroupState', () => {
+    let emitter, spy, action;
+    const UPDATE_GROUPS_EVENT = 'update:groups';
+
+    beforeEach(() => {
+      emitter = new Emitter();
+      spy = createSpy();
+
+      action = actions.sendGroupState({
+        state: { on: true },
+        socket: emitter,
+        group: 3,
+      });
+    });
+
+    it('should return a promise', () => {
+      const result = store.dispatch(action);
+      expect(result.then).toBeA(Function);
+    });
+
+    it('should emit updates to the server', () => {
+      emitter.on(UPDATE_GROUPS_EVENT, spy);
+
+      store.dispatch(action);
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('should resolve when the server finishes', () => {
+      emitter.on(UPDATE_GROUPS_EVENT, spy);
+
+      const promise = store.dispatch(action);
+      const [{ requestId }] = spy.calls[0].arguments;
+
+      emitter.emit(requestId, null, 'success');
+
+      return promise;
+    });
+
+    it('should send the group id and state', () => {
+      emitter.on(UPDATE_GROUPS_EVENT, spy);
+      const group = 1, state = { on: true };
+
+      const action = actions.sendGroupState({
+        socket: emitter,
+        group, state,
+      });
+
+      store.dispatch(action);
+
+      const [update] = spy.calls[0].arguments;
+
+      expect(update).toContain({ state, group });
+    });
+
+    it('should reject if the server returns an error', () => {
+      emitter.on(UPDATE_GROUPS_EVENT, spy);
+
+      const promise = store.dispatch(action);
+      const [{ requestId }] = spy.calls[0].arguments;
+
+      // Fake server error.
+      emitter.emit(requestId, { message: 'no dice' });
+
+      return promise.then(() => {
+        throw new Error('Expected promise to reject.');
+      }).catch((error) => {
+        expect(error).toContain({ message: 'no dice' });
+      });
     });
 
   });

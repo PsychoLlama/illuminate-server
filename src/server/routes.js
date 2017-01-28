@@ -34,7 +34,7 @@ const renderFullPage = (app) => `
     }
   </script>
 
-  <script src="/bundle.js" async></script>
+  <script src="/bundle.js"></script>
 
 </body>
 </html>

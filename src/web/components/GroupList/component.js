@@ -1,31 +1,54 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import Group from '../Group';
 
-// Turns a key-value pair into a <Group> component.
-const toGroupElement = ([name, data]) => (
-  <Group {...data} key={name} />
-);
+import { actions } from './index';
+import Group from '../Group';
 
 /**
  * Renders and updates a list of groups.
  * @class
  */
-export const GroupList = ({ groups }) => {
+export const GroupList = ({ groups, updateGroup }) => {
 
   const groupComponents = Object
     .entries(groups)
     .filter(([, group]) => group.type === 'Room')
-    .map(toGroupElement);
+    .map(
+      ([id, data]) => (
+        <Group {...data} key={id} onClick={() => {
+          const on = data.state.any_on;
+          updateGroup(id, { on: !on });
+        }} />
+      )
+    );
 
   return <div>{groupComponents}</div>;
 };
 
 GroupList.propTypes = {
   groups: PropTypes.object.isRequired,
+  updateGroup: PropTypes.func.isRequired,
 };
 
 /** Bind <GroupList> to redux. */
 export default connect(
-  ({ groups }) => ({ groups })
+  ({ groups }) => ({ groups }),
+  (dispatch, { socket }) => ({
+    updateGroup: (group, state) => {
+
+      // Update state remotely.
+      dispatch(actions.sendGroupState({
+        socket,
+        group,
+        state,
+      }));
+
+      // Immediately update local state.
+      dispatch(actions.setGroupState(group, {
+        ...group.state,
+        'any_on': state.on,
+        'all_on': state.on,
+      }));
+    },
+  }),
 )(GroupList);
