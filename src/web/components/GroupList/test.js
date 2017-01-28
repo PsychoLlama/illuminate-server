@@ -1,5 +1,4 @@
 /* eslint-env mocha */
-/* eslint-disable camelcase */
 import Emitter from 'events';
 
 import { createStore, applyMiddleware } from 'redux';
@@ -8,34 +7,9 @@ import { shallow } from 'enzyme';
 import thunk from 'redux-thunk';
 import React from 'react';
 
+import { createFakeGroup } from '../../test-utils';
 import { reducer, actions } from './index';
 import { GroupList } from './component';
-
-const createFakeGroup = (settings = {}) => ({
-  action: {
-    colormode: 'xy',
-    alert: 'select',
-    hue: 34076,
-    on: false,
-    bri: 254,
-    sat: 251,
-    ct: 153,
-  },
-
-  xy: [0.3144, 0.3301],
-
-  state: {
-    all_on: false,
-    any_on: false,
-  },
-
-  class: 'Living room',
-  name: 'Living Room',
-  lights: ['1', '2'],
-  type: 'Room',
-
-  ...settings,
-});
 
 describe('Action', () => {
   let store;
@@ -199,7 +173,12 @@ describe('A collection of groups', () => {
   });
 
   it('should pass group data to <Group> elements', () => {
-    const data = { name: 'Hall', type: 'Room', lights: [] };
+    const data = createFakeGroup({
+      name: 'Hall',
+      type: 'Room',
+      lights: [],
+    });
+
     const groups = { 'unique-id': data };
 
     const list = shallow(<GroupList groups={groups} />);
