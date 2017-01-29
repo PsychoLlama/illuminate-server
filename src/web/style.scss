@@ -1,0 +1,53 @@
+/* Colors */
+$off-white: #f8f8f8;
+
+/* Sizes */
+$mobile: 0px;
+$tablet: 400px;
+$laptop: 1200px;
+
+/* Global Style */
+body, h1, h2, h3, h4, h5, h6 {
+  font-family: sans-serif;
+  margin: 0;
+}
+
+body {
+  background-color: $off-white;
+  min-height: 100vh;
+}
+
+/* <GroupList> Style */
+.grouplist {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+/* <Group> Style */
+.group {
+  text-align: center;
+  padding: 2rem 0.5rem;
+  box-sizing: border-box;
+  width: 50%;
+  color: $off-white;
+  background-color: black;
+  transition: background-color 0.25s;
+
+  &.all-on {
+    background-color: $off-white;
+    color: black;
+  }
+
+  /* Tablets and larger */
+  @media (min-width: $tablet) {
+    width: calc(100% / 3);
+    font-size: 120%;
+  }
+
+  /* Laptops and larger */
+  @media (min-width: $laptop) {
+    width: 20%;
+    font-size: 150%;
+  }
+}

@@ -21,7 +21,11 @@ export const GroupList = ({ groups, updateGroup }) => {
     .filter(([, group]) => group.type === 'Room')
     .map(toGroupComponent);
 
-  return <div>{groupComponents}</div>;
+  return (
+    <div className='grouplist'>
+      {groupComponents}
+    </div>
+  );
 };
 
 GroupList.propTypes = {
