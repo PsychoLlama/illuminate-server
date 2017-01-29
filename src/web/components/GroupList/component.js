@@ -4,6 +4,14 @@ import { connect } from 'react-redux';
 import { actions } from './index';
 import Group from '../Group';
 
+const sortByGroupName = ([, last], [, next]) => {
+  if (last.name === next.name) {
+    return 0;
+  }
+
+  return last.name > next.name ? -1 : 1;
+};
+
 /**
  * Renders and updates a list of groups.
  * @class
@@ -16,9 +24,11 @@ export const GroupList = ({ groups, updateGroup }) => {
       updateGroup(id, { on: !on });
     }} />
   );
+
   const groupComponents = Object
     .entries(groups)
     .filter(([, group]) => group.type === 'Room')
+    .sort(sortByGroupName)
     .map(toGroupComponent);
 
   return (
