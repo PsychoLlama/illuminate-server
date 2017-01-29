@@ -1,14 +1,12 @@
 /* eslint-disable global-require */
 import { AppContainer } from 'react-hot-loader';
-import Socket from 'socket.io-client';
 import { render } from 'react-dom';
 import React from 'react';
 
 import App from './components/App';
+import socket from './socket';
 import store from './state';
 import './style';
-
-const socket = Socket(location.origin);
 
 const root = document.getElementById('root');
 

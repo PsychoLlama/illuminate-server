@@ -33,6 +33,7 @@ body {
   color: $off-white;
   background-color: black;
   transition: background-color 0.25s;
+  cursor: pointer;
 
   &.all-on {
     background-color: $off-white;
