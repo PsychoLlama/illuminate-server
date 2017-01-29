@@ -25,7 +25,7 @@ if (module.hot) {
 
     render(
       <AppContainer>
-        <NextApp store={store} />
+        <NextApp store={store} socket={socket} />
       </AppContainer>,
       root
     );
