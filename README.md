@@ -1,6 +1,11 @@
-# luminary
+# [unmaintained] luminary-legacy
 
 *Home IoT dashboard server*
+
+## Maintenance Notice
+I've stopped work on this project permanently. The polling is cool and the usage history "works", but I had no idea how to organize a server and it ended up becoming spaghetti.
+
+I rewrote a lot of this from scratch and called it [filament](https://github.com/PsychoLlama/filament). It uses GraphQL now. GraphQL is cool.
 
 ## Why
 I'm excited by IoT, dashboards, and IoT dashboards.
